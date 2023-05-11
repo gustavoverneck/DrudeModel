@@ -1,12 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# NEED TO:
+#   - Fix plot
+#   - Add animation with mp4 output
+#   - Add colision to electrons
+#   - Activate or disable electron-electron forces and electron-nucleon forces
 
 k = np.float64(8.99*10E9) # N.m²/C²
 q = np.float64(1.6*10E-19) # C
 me = np.float64(9.109E-31) # kg
 dt = 0.01
-
 
 class Electron:
     def __init__(self, id, x, y, vx, vy):
