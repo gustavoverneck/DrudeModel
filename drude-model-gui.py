@@ -12,7 +12,10 @@ k = np.float64(8.99*10E9) # N.m²/C²
 q = np.float64(1.6*10E-19) # C
 me = np.float64(9.109E-31) # kg
 dt = 0.01
-limit_distance = 2
+limit_distance = 4
+enable_interaction = False
+n_electrons = 20
+total_time = 0
 
 #creates the window
 root = tk.Tk()
@@ -49,6 +52,7 @@ class Electron:
         canvas.move(self.shape, self.vx*dt, self.vy*dt)
 
     def verify_limits(self):
+        global width, length
         x_lim = width ; y_lim = length
         if abs(self.x) >= x_lim:
             self.vx *= -1
@@ -60,31 +64,27 @@ class Electron:
         for p in particles:
             if p.type() == "Nucleon":
                 d = np.sqrt((p.x - self.x)**2 + (p.y - self.y)**2)
-                if d <= limit_distance: # Considering it pontual for now because of bugs
-                    self.vx*=-1
-                    self.vy*=-1
-                    '''v_e = np.sqrt(self.vx**2 + self.vy**2)
+                if d <= limit_distance:
+                    v_e = np.sqrt(self.vx**2 + self.vy**2)
                     r_n = np.sqrt(p.x**2 + p.y**2)
-                    print("d: ", d)
-                    print("v_e: ", v_e)
-                    print("r_n: ", r_n)
                     alphax = (self.vx/v_e) - (p.x/r_n)
                     alphay = (self.vy/v_e) - (p.y/r_n)
                     self.vx = alphax * (v_e)
-                    self.vy = alphay * (v_e)'''
+                    self.vy = alphay * (v_e)
             
     def type(self):
         return "Electron"
     
     def getForce(self, particles):
-        self.fx = 0
-        self.fy = 0
-        for p in particles:
-            if self.id != p.id:
-                d = np.sqrt((p.x - self.x)**2 + (p.y - self.y)**2)
-                fe = k*q*p.q/d**3
-                self.fx += fe*(p.x - self.x)
-                self.fy += fe*(p.y - self.y)
+        global enable_interaction
+        self.fx += 10
+        self.fy += 0
+        '''for p in particles:
+			if (self.id != p.id):
+				d = np.sqrt((p.x - self.x)**2 + (p.y - self.y)**2)
+				fe = k*q*p.q/d**3
+				self.fx += fe*(p.x - self.x)
+				self.fy += fe*(p.y - self.y)'''
 
 class Nucleon:
     def __init__(self, id, x, y, Z, color="red"):
@@ -157,18 +157,23 @@ class Mesh:
         
 
 def setup():
-    global mesh, width, lenght
+    global mesh; width; length
     mesh = Mesh(width=width, length=length, atom="Cu")
     mesh.backgroundMesh()
-    mesh.add(Electron(41, 10, length/2, random.randint(0,50), random.randint(-50, 50)))    
+    time = 0
+    for i in range(n_electrons):
+        mesh.add(Electron(41, 10, i*length/n_electrons, random.randint(0,100), random.randint(-100, 100)))
 
 def main():
+    global particles; n_electrons
+    time = 0
+    print(time)
     [i.verify_limits() for i in particles]
     [i.update() for i in particles]
     [j.collide() for j in particles]
     canvas.after(int(1000*dt), main)
-    
-
+    #for i in range(n_electrons):
+    #    mesh.add(Electron(41, 10, i*length/n_electrons, random.randint(0, 100), random.randint(-50, 100)))
 setup()
 main()
 root.mainloop()
